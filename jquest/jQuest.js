@@ -2,7 +2,6 @@ jQuest = {};
 
 jQuest.playgroundWidth = 800;
 jQuest.playgroundHeight = 600;
-jQuest.OFFSCREEN = -10000;
 jQuest.viewCounter = 0;
 
 jQuest.createPlayground = function(div) {
@@ -22,10 +21,10 @@ jQuest.startGame = function() {
 jQuest.View = function(options) {
 
     var defaults = {
-        name:        "view",
-        group:       $.playground(),
+        name:             "view",
+        group:            $.playground(),
         backgroundImage:  "img/views/default.png",
-        views:       {}
+        views:            {}
     };
     options = $.extend(defaults, options);
 
@@ -36,40 +35,38 @@ jQuest.View = function(options) {
     }
     this.group = options.group;
     var backgroundImage = options.backgroundImage;
-    var views = options.views;
+    this.views = options.views;
 
     this.setView = function(direction, view) {
-        views[direction] = view;
+        this.views[direction] = view;
         return this;
     };
 
     this.hide = function() {
         jQuest.util.log("hiding view '" + this.name + "'");
-        $("#" + this.name).css("top", jQuest.OFFSCREEN).css("left", jQuest.OFFSCREEN);
+        $("#" + this.name).fadeOut();
     };
 
-    this.show = function(name) {
+    this.show = function() {
         jQuest.util.log("showing view '" + this.name + "'");
-        $("#" + this.name).css("top", "").css("left", "");
+        $("#" + this.name).fadeIn();
+    };
+
+    this.flicker = function() {
+        $("#" + this.name).animate({ opacity: 0.5 }, 'fast').animate({ opacity: 1.0 }, 'fast');
     };
 
     this.move = function(direction) {
-        switch (direction) {
-            case 'forward':
-                if (views.forward) return views.forward;
-                break;
-            case 'back':
-                if (views.back) return views.back;
-                break;
-            case 'left':
-                if (views.left) return views.left;
-                break;
-            case 'right':
-                if (views.right) return views.right;
-                break;
-            default:
-                jQuest.util.log('invalid direction: ' + direction)
+        var view = this.views[direction];
+        if (view == undefined) {
+            this.flicker();
+            return this;
         }
+
+        this.hide();
+        view.show();
+
+        return view;
     };
 
     this.init = function(self) {
@@ -84,14 +81,39 @@ jQuest.View = function(options) {
         jQuest.util.log("new self created with name '" + self.name + "'");
     }(this);
 
-    return this;
 };
 
-jQuest.Game = function(currentView) {
+jQuest.Game = function(initialView) {
 
-    this.currentView = currentView;
+    this.currentView = initialView;
 
-    this.currentView.show();
+    this.move = function(direction) {
+        this.currentView = this.currentView.move(direction);
+    };
+
+    this.init = function(self) {
+
+        $(document).keyup(function(e) {
+            switch (e.keyCode) {
+                case 37:
+                    jQuest.util.log('moving left')
+                    self.move('left');
+                    break;
+                case 38:
+                    self.move('forward');
+                    break;
+                case 39:
+                    jQuest.util.log('moving right')
+                    self.move('right');
+                    break;
+                case 40:
+                    self.move('backward');
+                    break;
+            }
+        });
+
+        self.currentView.show();
+    }(this);
 };
 
 jQuest.util = {
