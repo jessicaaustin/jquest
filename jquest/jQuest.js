@@ -3,6 +3,7 @@ jQuest = {};
 jQuest.playgroundWidth = 800;
 jQuest.playgroundHeight = 600;
 jQuest.viewCounter = 0;
+jQuest.itemCounter = 0;
 
 jQuest.createPlayground = function(div) {
     div.playground({
@@ -23,8 +24,9 @@ jQuest.View = function(options) {
     var defaults = {
         name:             "view",
         group:            $.playground(),
-        backgroundImage:  "img/views/default.png",
-        views:            {}
+        backgroundImage:  "",
+        views:            {},
+        items:            {}
     };
     options = $.extend(defaults, options);
 
@@ -36,6 +38,7 @@ jQuest.View = function(options) {
     this.group = options.group;
     var backgroundImage = options.backgroundImage;
     this.views = options.views;
+    this.items = options.items;
 
     this.setLeft = function(view) {
         if (this.views['left']) {
@@ -74,14 +77,23 @@ jQuest.View = function(options) {
     };
 
     this.hide = function() {
+        $.each(this.items, function() {
+            this.hide();
+        });
         $("#" + this.name).fadeOut();
     };
 
     this.show = function() {
         $("#" + this.name).fadeIn();
+        $.each(this.items, function() {
+            this.show();
+        });
     };
 
     this.flicker = function() {
+        $.each(this.items, function() {
+            this.flicker();
+        });
         $("#" + this.name).animate({ opacity: 0.5 }, 'fast').animate({ opacity: 1.0 }, 'fast');
     };
 
@@ -98,6 +110,13 @@ jQuest.View = function(options) {
         return view;
     };
 
+    this.addItem = function(item, itemOptions, callback) {
+        console.log('add item')
+        this.group.addSprite(item.name, itemOptions, callback);
+        this.items[item.name] = item;
+        jQuest.util.log("Item with name '" + item.name + "' added to '" + this.name + "'");
+    };
+
     this.init = function(self) {
         self.group.addSprite(self.name, {
             animation: new $.gameQuery.Animation({ imageURL: backgroundImage }),
@@ -110,6 +129,56 @@ jQuest.View = function(options) {
         jQuest.util.log("new View created with name '" + self.name + "'");
     }(this);
 
+};
+
+jQuest.Item = function(view, options) {
+
+    this.view = view;
+    var defaults = {
+        name:   "item",
+        image:  "",
+        posx:   0,
+        posy:   0,
+        width:  100,
+        height: 100
+    };
+    options = $.extend(defaults, options);
+
+    this.name = options.name;
+    if (this.name == "item") {
+        this.name = "item" + jQuest.itemCounter;
+        jQuest.itemCounter++;
+    }
+    var image = options.image;
+    var posx = options.posx;
+    var posy = options.posy;
+    var width = options.width;
+    var height = options.height;
+
+    this.hide = function() {
+        $("#" + this.name).fadeOut();
+    };
+
+    this.show = function() {
+        $("#" + this.name).fadeIn();
+    };
+
+    this.flicker = function() {
+        $("#" + this.name).animate({ opacity: 0.5 }, 'fast').animate({ opacity: 1.0 }, 'fast');
+    };
+
+    this.init = function(self) {
+        self.view.addItem(self, {
+            height: height,
+            width: width,
+            posx: posx,
+            posy: posy
+        }, function() {
+            $("#" + self.name).append("<img src=\"" + image + "\" width=\"" + width + "\" height=\"" + height + "\"/>");
+            $("#" + self.name).css('cursor', 'pointer');
+            self.hide();
+        });
+    }(this);
 };
 
 jQuest.Game = function(initialView) {

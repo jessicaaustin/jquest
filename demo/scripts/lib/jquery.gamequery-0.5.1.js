@@ -638,7 +638,7 @@
         * Works only on the playground, the sceengraph root or a sceengraph group
         * This is a non-desrtuctive call
         **/
-        addSprite: function(sprite, options) {
+        addSprite: function(sprite, options, callback) {
             options = $.extend({
                 width:			32,
                 height:			32,
@@ -681,6 +681,10 @@
                                                             y: options.posy + options.height/2,
                                                             originalRadius: Math.sqrt(Math.pow(options.width,2) + Math.pow(options.height,2))/2};
                 spriteDOMObject.gameQuery.boundingCircle.radius = spriteDOMObject.gameQuery.boundingCircle.originalRadius;
+            }
+
+            if (callback != undefined && typeof callback == 'function') {
+                callback();
             }
             return this;
         },

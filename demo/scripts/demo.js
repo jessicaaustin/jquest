@@ -13,6 +13,14 @@ function setup() {
         group: views,
         backgroundImage: "img/views/room-wall-west-detail.png"
     });
+    var key = new jQuest.Item(westDetail, {
+        image:  "img/items/key.gif",
+        posx:   198,
+        posy:   347,
+        width:  40,
+        height: 30
+    });
+
     var north = new jQuest.View({
         name: "northWall",
         group: views,
@@ -23,6 +31,13 @@ function setup() {
         group: views,
         backgroundImage: "img/views/room-wall-north-detail.png"
     });
+    var lock = new jQuest.Item(northDetail, {
+        posx:   171,
+        posy:   192,
+        width:  100,
+        height: 100
+    });
+
     var east = new jQuest.View({
         name: "eastWall",
         group: views,
