@@ -37,18 +37,47 @@ jQuest.View = function(options) {
     var backgroundImage = options.backgroundImage;
     this.views = options.views;
 
-    this.setView = function(direction, view) {
-        this.views[direction] = view;
+    this.setLeft = function(view) {
+        if (this.views['left']) {
+            return this;
+        }
+        this.views['left'] = view;
+        view.setRight(this);
+        return this;
+    };
+
+    this.setRight = function(view) {
+        if (this.views['right']) {
+            return this;
+        }
+        this.views['right'] = view;
+        view.setLeft(this);
+        return this;
+    };
+
+    this.setForward = function(view) {
+        if (this.views['forward']) {
+            return this;
+        }
+        this.views['forward'] = view;
+        view.setBackward(this);
+        return this;
+    };
+
+    this.setBackward = function(view) {
+        if (this.views['backward']) {
+            return this;
+        }
+        this.views['backward'] = view;
+        view.setForward(this);
         return this;
     };
 
     this.hide = function() {
-        jQuest.util.log("hiding view '" + this.name + "'");
         $("#" + this.name).fadeOut();
     };
 
     this.show = function() {
-        jQuest.util.log("showing view '" + this.name + "'");
         $("#" + this.name).fadeIn();
     };
 
@@ -78,7 +107,7 @@ jQuest.View = function(options) {
 
         self.hide();
 
-        jQuest.util.log("new self created with name '" + self.name + "'");
+        jQuest.util.log("new View created with name '" + self.name + "'");
     }(this);
 
 };
@@ -87,27 +116,21 @@ jQuest.Game = function(initialView) {
 
     this.currentView = initialView;
 
-    this.move = function(direction) {
-        this.currentView = this.currentView.move(direction);
-    };
-
     this.init = function(self) {
 
         $(document).keyup(function(e) {
             switch (e.keyCode) {
                 case 37:
-                    jQuest.util.log('moving left')
-                    self.move('left');
+                    self.currentView = self.currentView.move('left');
                     break;
                 case 38:
-                    self.move('forward');
+                    self.currentView = self.currentView.move('forward');
                     break;
                 case 39:
-                    jQuest.util.log('moving right')
-                    self.move('right');
+                    self.currentView = self.currentView.move('right');
                     break;
                 case 40:
-                    self.move('backward');
+                    self.currentView = self.currentView.move('backward');
                     break;
             }
         });

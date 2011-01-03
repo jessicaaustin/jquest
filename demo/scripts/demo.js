@@ -34,12 +34,9 @@ function setup() {
         backgroundImage: "img/views/room-wall-east-detail.png"
     });
 
-    west.setView('right', north).setView('forward', westDetail);
-    westDetail.setView('backward', west);
-    north.setView('forward', northDetail).setView('left', west).setView('right', east);
-    northDetail.setView('backward', north);
-    east.setView('forward', eastDetail).setView('left', north);
-    eastDetail.setView('backward', east);
+    west.setForward(westDetail).setRight(north);
+    north.setForward(northDetail).setRight(east);
+    east.setForward(eastDetail);
 
     window.game = new jQuest.Game(west);
 }
