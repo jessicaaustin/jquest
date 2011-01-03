@@ -1,27 +1,42 @@
 jQuest = {};
 
+jQuest.playgroundWidth = 800;
+jQuest.playgroundHeight = 600;
 jQuest.OFFSCREEN = -10000;
 jQuest.viewCounter = 0;
+
+jQuest.createPlayground = function(div) {
+    div.playground({
+        width: jQuest.playgroundWidth,
+        height: jQuest.playgroundHeight,
+        keyTracker: true});
+    jQuest.util.log('playground created');
+};
+
+jQuest.startGame = function() {
+    $.playground().startGame(function() {
+        jQuest.util.log('game loaded');
+    });
+};
 
 jQuest.View = function(options) {
 
     var defaults = {
-        name: "view", // TODO use the name of the div created by gameQuery instead
-        background:        new $.gameQuery.Animation({imageURL: 'img/views/default.png'}),
-        views: {}
+        name:        "view",
+        group:       $.playground(),
+        backgroundImage:  "img/views/default.png",
+        views:       {}
     };
     options = $.extend(defaults, options);
 
     this.name = options.name;
-    this.background = options.background;
-    var views = options.views;
-
     if (this.name == "view") {
         this.name = "view" + jQuest.viewCounter;
         jQuest.viewCounter++;
     }
-
-    jQuest.util.log("new View created with name '" + this.name + "'");
+    this.group = options.group;
+    var backgroundImage = options.backgroundImage;
+    var views = options.views;
 
     this.setView = function(direction, view) {
         views[direction] = view;
@@ -57,55 +72,26 @@ jQuest.View = function(options) {
         }
     };
 
+    this.init = function(self) {
+        self.group.addSprite(self.name, {
+            animation: new $.gameQuery.Animation({ imageURL: backgroundImage }),
+            width: jQuest.playgroundWidth,
+            height: jQuest.playgroundHeight
+        });
+
+        self.hide();
+
+        jQuest.util.log("new self created with name '" + self.name + "'");
+    }(this);
+
+    return this;
 };
 
-jQuest.Game = function(playgroundWidth, playgroundHeight) {
+jQuest.Game = function(currentView) {
 
-    var setupViews = function(playgroundWidth, playgroundHeight) {
-        var west = new jQuest.View({
-            name: "west",
-            background: new $.gameQuery.Animation({ imageURL: "img/views/room-wall-west.png"})
-        });
-        var north = new jQuest.View({
-            name: "north",
-            background: new $.gameQuery.Animation({ imageURL: "img/views/room-wall-north.png"})
-        });
-        var east = new jQuest.View({
-            name: "east",
-            background: new $.gameQuery.Animation({ imageURL: "img/views/room-wall-east.png"})
-        });
+    this.currentView = currentView;
 
-        west.setView('right', north);
-        north.setView('left', west).setView('right', east);
-        east.setView('left', north);
-
-        $.playground()
-                .addGroup("views", {width: playgroundWidth, height: playgroundHeight})
-                .addSprite("west", {animation: west.background,
-                                       width: playgroundWidth, height: playgroundHeight})
-                .addSprite("north", {animation: north.background,
-                                        width: playgroundWidth, height: playgroundHeight})
-                .addSprite("east", {animation: east.background,
-                                       width: playgroundWidth, height: playgroundHeight});
-        return [west, north, east];
-    };
-
-    this.getView = function(name) {
-        for each (var view in this.views) {
-            if (view.name == name) {
-                return view;
-            }
-        }
-    };
-
-    this.views = setupViews(playgroundWidth, playgroundHeight);
-
-    for each (var view in this.views) {
-        view.hide();
-    }
-    this.getView("west").show();
-
-    jQuest.util.log("new Game created");
+    this.currentView.show();
 };
 
 jQuest.util = {

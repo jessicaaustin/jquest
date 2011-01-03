@@ -1,12 +1,35 @@
-$(document).ready(function() {
-    $("#playground").playground({
-        height: 400,
-        width: 450,
-        keyTracker: true});
+function setup() {
+    jQuest.createPlayground($("#playground"));
 
-    window.game = new jQuest.Game(450, 400);
+    var views = $.playground().addGroup("views", {width: jQuest.playgroundWidth, height: jQuest.playgroundHeight});
 
-    $.playground().startGame(function() {
-        jQuest.util.log('game loaded');
+    var west = new jQuest.View({
+        name: "west",
+        group: views,
+        backgroundImage: "img/views/room-wall-west.png"
     });
+    var north = new jQuest.View({
+        name: "north",
+        group: views,
+        backgroundImage: "img/views/room-wall-north.png"
+    });
+    var east = new jQuest.View({
+        name: "east",
+        group: views,
+        backgroundImage: "img/views/room-wall-east.png"
+    });
+
+    west.setView('right', north);
+    north.setView('left', west).setView('right', east);
+    east.setView('left', north);
+
+    window.game = new jQuest.Game(west);
+}
+
+$(document).ready(function() {
+    jQuest.playgroundWidth = 450;
+    jQuest.playgroundHeight = 400;
+
+    setup();
+    jQuest.startGame();
 });
