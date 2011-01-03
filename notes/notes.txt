@@ -1,0 +1,32 @@
+jQuest
+
+jQuery-based myst-style adventure game
+
+1.0 (Views)
+ - room with 4 cardinal directions (Views)
+ - arrow keys rotate around
+  (jQuery.gameQuery.keyTracker)
+
+1.1 (Items)
+ - room has objects (Items)
+   - Items have 
+     states: visible, hidden
+     actions: move, highlight, make noise?
+ - can click object to change visible state (open/closed)
+ - can click object to reveal another object (z-index? opacity?)
+
+1.2 (Inventory)
+ - can take an Item and put in Inventory
+ - action of object can depend on current Inventory
+
+1.3 (cool UI)
+ - add ambient sound
+ - objects can have sounds
+ - objects have animations (using $.animate())
+
+1.4 (complex Items (Puzzles?))
+ - Items with state, have to complete certain sequence to unlock something
+
+
+
+v2: editor mode

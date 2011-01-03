@@ -1,0 +1,11 @@
+Possible item categories:
+- Note (has text and/or image), only intended for viewing
+- Trigger (some Items require other items in order for their action to occur, these are Triggers. e.g. a door Item might require a key Trigger)
+- triggerable (need better name)
+
+
+Possible action categories:
+- success
+- failure
+- click
+- view
