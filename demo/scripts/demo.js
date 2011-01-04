@@ -1,16 +1,13 @@
-function setup() {
-    jQuest.createPlayground($("#playground"));
-
-    var views = $.playground().addGroup("views", {width: jQuest.playgroundWidth, height: jQuest.playgroundHeight});
+function setupViews() {
 
     var west = new jQuest.View({
         name: "westWall",
-        group: views,
+        group: window.game.views,
         backgroundImage: "img/views/room-wall-west.png"
     });
     var westDetail = new jQuest.View({
         name: "westDetail",
-        group: views,
+        group: window.game.views,
         backgroundImage: "img/views/room-wall-west-detail.png"
     });
     var key = new jQuest.Item(westDetail, {
@@ -23,12 +20,12 @@ function setup() {
 
     var north = new jQuest.View({
         name: "northWall",
-        group: views,
+        group: window.game.views,
         backgroundImage: "img/views/room-wall-north.png"
     });
     var northDetail = new jQuest.View({
         name: "northDetail",
-        group: views,
+        group: window.game.views,
         backgroundImage: "img/views/room-wall-north-detail.png"
     });
     var lock = new jQuest.Item(northDetail, {
@@ -40,12 +37,12 @@ function setup() {
 
     var east = new jQuest.View({
         name: "eastWall",
-        group: views,
+        group: window.game.views,
         backgroundImage: "img/views/room-wall-east.png"
     });
     var eastDetail = new jQuest.View({
         name: "eastDetail",
-        group: views,
+        group: window.game.views,
         backgroundImage: "img/views/room-wall-east-detail.png"
     });
 
@@ -53,13 +50,14 @@ function setup() {
     north.setForward(northDetail).setRight(east);
     east.setForward(eastDetail);
 
-    window.game = new jQuest.Game(west);
+    window.game.setInitialView(west);
 }
 
 $(document).ready(function() {
-    jQuest.playgroundWidth = 450;
-    jQuest.playgroundHeight = 400;
+    jQuest.viewWidth = 600;
+    jQuest.viewHeight = 400;
 
-    setup();
-    jQuest.startGame();
+    window.game = new jQuest.Game($("#playground"));
+    setupViews();
+    window.game.startGame();
 });

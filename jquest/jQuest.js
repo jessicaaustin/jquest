@@ -1,23 +1,10 @@
 jQuest = {};
 
-jQuest.playgroundWidth = 800;
-jQuest.playgroundHeight = 600;
+jQuest.viewWidth = 800;
+jQuest.viewHeight = 600;
 jQuest.viewCounter = 0;
 jQuest.itemCounter = 0;
-
-jQuest.createPlayground = function(div) {
-    div.playground({
-        width: jQuest.playgroundWidth,
-        height: jQuest.playgroundHeight,
-        keyTracker: true});
-    jQuest.util.log('playground created');
-};
-
-jQuest.startGame = function() {
-    $.playground().startGame(function() {
-        jQuest.util.log('game loaded');
-    });
-};
+jQuest.inventory = {};
 
 jQuest.View = function(options) {
 
@@ -120,8 +107,8 @@ jQuest.View = function(options) {
     this.init = function(self) {
         self.group.addSprite(self.name, {
             animation: new $.gameQuery.Animation({ imageURL: backgroundImage }),
-            width: jQuest.playgroundWidth,
-            height: jQuest.playgroundHeight
+            width: jQuest.viewWidth,
+            height: jQuest.viewHeight
         });
 
         self.hide();
@@ -154,9 +141,12 @@ jQuest.Item = function(view, options) {
     var posy = options.posy;
     var width = options.width;
     var height = options.height;
+    this.taken = false;
 
     this.hide = function() {
-        $("#" + this.name).fadeOut();
+        if (!this.taken) {
+            $("#" + this.name).fadeOut();
+        }
     };
 
     this.show = function() {
@@ -164,7 +154,14 @@ jQuest.Item = function(view, options) {
     };
 
     this.flicker = function() {
-        $("#" + this.name).animate({ opacity: 0.5 }, 'fast').animate({ opacity: 1.0 }, 'fast');
+        if (!this.taken) {
+            $("#" + this.name).animate({ opacity: 0.5 }, 'fast').animate({ opacity: 1.0 }, 'fast');
+        }
+    };
+
+    this.take = function() {
+        jQuest.util.log("taking Item '" + this.name + "'");
+        $("#" + this.name).css('top', 100).css('left', 500);
     };
 
     this.init = function(self) {
@@ -176,16 +173,37 @@ jQuest.Item = function(view, options) {
         }, function() {
             $("#" + self.name).append("<img src=\"" + image + "\" width=\"" + width + "\" height=\"" + height + "\"/>");
             $("#" + self.name).css('cursor', 'pointer');
+            $("#" + self.name).click(function() {
+                jQuest.util.log("taking Item '" + self.name + "'");
+                $("#" + self.name).css('top', '50px').css('left', '475px');
+                $("#" + self.name + " img").attr('width', 75).attr('height', 75);
+                $("#" + self.name).css('width', 75).css('height', 75);
+            });
             self.hide();
         });
     }(this);
 };
 
-jQuest.Game = function(initialView) {
+jQuest.Game = function(playground) {
 
-    this.currentView = initialView;
+    this.setInitialView = function(view) {
+        this.currentView = view;
+        this.currentView.show();
+    };
+
+    this.startGame = function() {
+        $.playground().startGame(function() {
+            jQuest.util.log('game loaded');
+        });
+    };
 
     this.init = function(self) {
+        playground.playground({
+            width: jQuest.viewWidth,
+            height: jQuest.viewHeight,
+            keyTracker: true});
+
+        this.views = $.playground().addGroup("views", {width: jQuest.viewWidth, height: jQuest.viewHeight});
 
         $(document).keyup(function(e) {
             switch (e.keyCode) {
@@ -203,8 +221,6 @@ jQuest.Game = function(initialView) {
                     break;
             }
         });
-
-        self.currentView.show();
     }(this);
 };
 
