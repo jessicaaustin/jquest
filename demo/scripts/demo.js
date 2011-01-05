@@ -2,12 +2,12 @@ function setupViews() {
 
     var west = new jQuest.View({
         name: "westWall",
-        group: window.game.views,
+        group: jQuest.game.views,
         backgroundImage: "img/views/room-wall-west.png"
     });
     var westDetail = new jQuest.View({
         name: "westDetail",
-        group: window.game.views,
+        group: jQuest.game.views,
         backgroundImage: "img/views/room-wall-west-detail.png"
     });
     var key = new jQuest.Item(westDetail, {
@@ -20,13 +20,18 @@ function setupViews() {
 
     var north = new jQuest.View({
         name: "northWall",
-        group: window.game.views,
+        group: jQuest.game.views,
         backgroundImage: "img/views/room-wall-north.png"
     });
     var northDetail = new jQuest.View({
         name: "northDetail",
-        group: window.game.views,
+        group: jQuest.game.views,
         backgroundImage: "img/views/room-wall-north-detail.png"
+    });
+    var balcony = new jQuest.View({
+        name: "balcony",
+        group: jQuest.game.views,
+        backgroundImage: "img/views/balcony.jpg"
     });
     var lock = new jQuest.Item(northDetail, {
         posx:   171,
@@ -34,30 +39,32 @@ function setupViews() {
         width:  100,
         height: 100
     });
+    lock.setChangeViewAction(balcony);
 
     var east = new jQuest.View({
         name: "eastWall",
-        group: window.game.views,
+        group: jQuest.game.views,
         backgroundImage: "img/views/room-wall-east.png"
     });
     var eastDetail = new jQuest.View({
         name: "eastDetail",
-        group: window.game.views,
+        group: jQuest.game.views,
         backgroundImage: "img/views/room-wall-east-detail.png"
     });
 
     west.setForward(westDetail).setRight(north);
     north.setForward(northDetail).setRight(east);
+    balcony.setBackward(northDetail);
     east.setForward(eastDetail);
 
-    window.game.setInitialView(west);
+    jQuest.game.setInitialView(west);
 }
 
 $(document).ready(function() {
-    jQuest.viewWidth = 600;
+    jQuest.viewWidth = 450;
     jQuest.viewHeight = 400;
 
-    window.game = new jQuest.Game($("#playground"));
+    jQuest.game = new jQuest.Game($("#playground"));
     setupViews();
-    window.game.startGame();
+    jQuest.game.startGame();
 });

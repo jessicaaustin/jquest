@@ -4,7 +4,6 @@ jQuest.viewWidth = 800;
 jQuest.viewHeight = 600;
 jQuest.viewCounter = 0;
 jQuest.itemCounter = 0;
-jQuest.inventory = {};
 
 jQuest.View = function(options) {
 
@@ -12,6 +11,10 @@ jQuest.View = function(options) {
         name:             "view",
         group:            $.playground(),
         backgroundImage:  "",
+        width:            jQuest.viewWidth,
+        height:           jQuest.viewHeight,
+        posx:             0,
+        posy:             0,
         views:            {},
         items:            {}
     };
@@ -24,6 +27,10 @@ jQuest.View = function(options) {
     }
     this.group = options.group;
     var backgroundImage = options.backgroundImage;
+    var width = options.width;
+    var height = options.height;
+    var posx = options.posx;
+    var posy = options.posy;
     this.views = options.views;
     this.items = options.items;
 
@@ -98,17 +105,23 @@ jQuest.View = function(options) {
     };
 
     this.addItem = function(item, itemOptions, callback) {
-        console.log('add item')
         this.group.addSprite(item.name, itemOptions, callback);
         this.items[item.name] = item;
         jQuest.util.log("Item with name '" + item.name + "' added to '" + this.name + "'");
     };
 
+    this.removeItem = function(name) {
+        delete this.items[name];
+        jQuest.util.log("Item with name '" + name + "' removed from '" + this.name + "'");
+    }
+
     this.init = function(self) {
         self.group.addSprite(self.name, {
             animation: new $.gameQuery.Animation({ imageURL: backgroundImage }),
-            width: jQuest.viewWidth,
-            height: jQuest.viewHeight
+            width: width,
+            height: height,
+            posx: posx,
+            posy: posy
         });
 
         self.hide();
@@ -159,10 +172,34 @@ jQuest.Item = function(view, options) {
         }
     };
 
-    this.take = function() {
-        jQuest.util.log("taking Item '" + this.name + "'");
-        $("#" + this.name).css('top', 100).css('left', 500);
-    };
+    this.setTakeAction = function() {
+        $("#" + this.name).unbind('click');
+        $("#" + this.name).css('cursor', 'pointer');
+        var self = this;
+        $("#" + this.name).click(function() {
+            jQuest.util.log("taking Item '" + self.name + "'");
+            $("#" + self.name).css('top', 50).css('left', jQuest.viewWidth + 30);
+            $("#" + self.name + " img").attr('width', 75).attr('height', 75);
+            $("#" + self.name).css('width', 75).css('height', 75);
+            self.view.removeItem(self.name);
+            self.view = jQuest.game.inventory;
+            self.view.addItem(self);
+            self.setNoAction();
+        });
+    }
+
+    this.setChangeViewAction = function(view) {
+        $("#" + this.name).unbind('click');
+        $("#" + this.name).css('cursor', 'pointer');
+        $("#" + this.name).click(function() {
+           jQuest.game.moveToView(view);
+        });
+    }
+
+    this.setNoAction = function() {
+        $("#" + this.name).unbind('click');
+        $("#" + this.name).css('cursor', 'default');
+    }
 
     this.init = function(self) {
         self.view.addItem(self, {
@@ -172,13 +209,7 @@ jQuest.Item = function(view, options) {
             posy: posy
         }, function() {
             $("#" + self.name).append("<img src=\"" + image + "\" width=\"" + width + "\" height=\"" + height + "\"/>");
-            $("#" + self.name).css('cursor', 'pointer');
-            $("#" + self.name).click(function() {
-                jQuest.util.log("taking Item '" + self.name + "'");
-                $("#" + self.name).css('top', '50px').css('left', '475px');
-                $("#" + self.name + " img").attr('width', 75).attr('height', 75);
-                $("#" + self.name).css('width', 75).css('height', 75);
-            });
+            self.setTakeAction();
             self.hide();
         });
     }(this);
@@ -197,13 +228,21 @@ jQuest.Game = function(playground) {
         });
     };
 
+    this.moveToView = function(view) {
+        this.currentView.hide();
+        this.currentView = view;
+        this.currentView.show();
+    }
+
     this.init = function(self) {
         playground.playground({
-            width: jQuest.viewWidth,
+            width: jQuest.viewWidth + 150,
             height: jQuest.viewHeight,
             keyTracker: true});
 
-        this.views = $.playground().addGroup("views", {width: jQuest.viewWidth, height: jQuest.viewHeight});
+        self.views = $.playground().addGroup("views", {width: jQuest.viewWidth, height: jQuest.viewHeight});
+        self.inventory = new jQuest.View({ name: "inventory", width: 150, height: jQuest.viewHeight, posx: jQuest.viewWidth });
+        self.inventory.show();
 
         $(document).keyup(function(e) {
             switch (e.keyCode) {
